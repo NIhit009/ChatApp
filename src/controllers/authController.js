@@ -68,3 +68,26 @@ exports.signUp = [
         return res.status(404).json({message: "Some errors occured..", errors});
 
     }]
+exports.login = async (req, res, next) => {
+    const {email, password} = req.body;
+    try {
+        const user = await User.findOne({email: email});
+        if (!user){
+            return res.status(400).json({message: "Invalid Details.."});
+        }
+        if (password !== user.password){
+            return res.status(400).json({message: "Invalid Details.."});
+        }
+        jwt.generateToken(email, res);
+        return res.status(200).json({message: "Login Successfully"});
+    } catch (error) {
+        return res.status(500).json({message: "Something went wrong during authentication.."})
+    }
+}
+
+exports.logout = (req, res, next) => {
+    res.clearCookie('authCookie', {
+        httpOnly: true
+    });
+    return res.status(200).json({message: "Logout successfull"});
+}
